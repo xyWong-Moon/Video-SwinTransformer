@@ -462,35 +462,6 @@ class BasicLayer(nn.Module):
             self.downsample = downsample(dim=dim, norm_layer=norm_layer)
 
 
-    '''
-        def create_mask(self, x, H, W):
-        # calculate attention mask for SW-MSA
-        # 保证Hp和Wp是window_size的整数倍
-        Hp = int(np.ceil(H / self.window_size)) * self.window_size
-        Wp = int(np.ceil(W / self.window_size)) * self.window_size
-        # 拥有和feature map一样的通道排列顺序，方便后续window_partition
-        img_mask = torch.zeros((1, Hp, Wp, 1), device=x.device)  # [1, Hp, Wp, 1]
-        h_slices = (slice(0, -self.window_size),
-                    slice(-self.window_size, -self.shift_size),
-                    slice(-self.shift_size, None))
-        w_slices = (slice(0, -self.window_size),
-                    slice(-self.window_size, -self.shift_size),
-                    slice(-self.shift_size, None))
-        cnt = 0
-        for h in h_slices:
-            for w in w_slices:
-                img_mask[:, h, w, :] = cnt
-                cnt += 1
-
-        mask_windows = window_partition(img_mask, self.window_size)  # [nW, Mh, Mw, 1]
-        mask_windows = mask_windows.view(-1, self.window_size * self.window_size)  # [nW, Mh*Mw]
-        attn_mask = mask_windows.unsqueeze(1) - mask_windows.unsqueeze(2)  # [nW, 1, Mh*Mw] - [nW, Mh*Mw, 1]
-        # [nW, Mh*Mw, Mh*Mw]
-        attn_mask = attn_mask.masked_fill(attn_mask != 0, float(-100.0)).masked_fill(attn_mask == 0, float(0.0))
-        return attn_mask
-    '''
-
-
     def forward(self, x):
         """ Forward function.
 
@@ -641,9 +612,7 @@ class SwinTransformer3D(nn.Module):
         return x
 
 
-def swin_tiny_patch4_window7_224(num_classes = 2, pretrained=False, **kwargs):
-    # trained ImageNet-1K
-    # https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_tiny_patch4_window7_224.pth
+def swin_tiny_patch4_window7_224(num_classes = 1000, **kwargs):
     model = SwinTransformer3D(in_chans=3,
                             patch_size=(4,4,4),
                             window_size=(8,7,7),
@@ -659,63 +628,8 @@ def swin_tiny_patch4_window7_224(num_classes = 2, pretrained=False, **kwargs):
                             patch_norm=True,
                             num_classes=num_classes,
                             **kwargs)
-    if pretrained:
-        print('load pretrained: swin_tiny_patch244_window877_kinetics400_1k.pth')
-        checkpoint = torch.load(
-            '/home/wanj/wanJ_workspace/action_recognition_project/config/swin_tiny_patch244_window877_kinetics400_1k.pth')
-        model_dict1 = checkpoint['state_dict']
-        model_dict2 = model.state_dict()
-        model_list1 = list(model_dict1.keys())
-        model_list2 = list(model_dict2.keys())
-        len1 = len(model_list1)
-        len2 = len(model_list2)
-        minlen = min(len1, len2)
-        for n in range(minlen):
-            if model_dict1[model_list1[n]].shape != model_dict2[model_list2[n]].shape:
-                continue
-            model_dict2[model_list2[n]] = model_dict1[model_list1[n]]
-        model.load_state_dict(model_dict2)
 
     return model
 
-
-def swin_small_patch4_window7_224(num_classes: int = 2, **kwargs):
-    # trained ImageNet-1K
-    # https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_small_patch4_window7_224.pth
-    model = SwinTransformer3D(in_chans=3,
-                            patch_size=(4, 4, 4),
-                            window_size=(8, 7, 7),
-                            embed_dim=96,
-                            depths=(2, 2, 18, 2),
-                            num_heads=(3, 6, 12, 24),
-                            mlp_ratio=4.,
-                            qkv_bias=True,
-                            qk_scale=None,
-                            drop_rate=0.,
-                            attn_drop_rate=0.,
-                            drop_path_rate=0.2,
-                            patch_norm=True,
-                            num_classes=num_classes,
-                            **kwargs)
-    return model
-
-
-def swin_base_patch4_window7_224(num_classes: int = 2, **kwargs):
-    model = SwinTransformer3D(in_chans=3,
-                            patch_size=(4, 4, 4),
-                            window_size=(16, 7, 7),
-                            embed_dim=128,
-                            depths=(2, 2, 18, 2),
-                            num_heads=(4, 8, 16, 32),
-                            mlp_ratio=4.,
-                            qkv_bias=True,
-                            qk_scale=None,
-                            drop_rate=0.,
-                            attn_drop_rate=0.,
-                            drop_path_rate=0.4,
-                            patch_norm=True,
-                            num_classes=num_classes,
-                            **kwargs)
-    return model
 
 
