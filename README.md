@@ -1,2 +1,2 @@
 # Video-SwinTransformer
-VideoSwinTransforemr pytorch Not mmaction2 just only pytorch
+Video SwinTransforemr pytorch Not mmaction2 just only python/pytorch
