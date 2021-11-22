@@ -1,4 +1,2 @@
 # Video-SwinTransformer
-VideoSwinTransforemr pytorch 
-not use mmaction2
-just only use python pytorch
+VideoSwinTransforemr pytorch Not mmaction2 just only pytorch
